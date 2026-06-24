@@ -163,6 +163,7 @@
             localStorage.setItem('curatedAppData', JSON.stringify(appData));
         }
 
+        // --- CALENDAR GENERATION ENGINE (CLEAN DOTS & CURRENT DAY SYNCHRONIZATION) ---
         function renderCalendar() {
             document.getElementById('calendar-month-year').innerText = `${monthNames[currentMonth]} ${currentYear}`;
             const grid = document.getElementById('calendar-grid');
@@ -171,42 +172,53 @@
             const firstDayIndex = new Date(currentYear, currentMonth, 1).getDay();
             const totalDays = new Date(currentYear, currentMonth + 1, 0).getDate();
 
+            // Get today's real date elements to check against
+            const today = new Date();
+            const todayKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
             for (let i = 0; i < firstDayIndex; i++) {
                 grid.innerHTML += `<div></div>`;
             }
 
             for (let day = 1; day <= totalDays; day++) {
                 const dateKey = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                
                 const dayData = appData[dateKey];
+                
                 const hasItineraryOrTask = dayData && ((dayData.itinerary && dayData.itinerary.length > 0) || (dayData.achievements && dayData.achievements.length > 0));
                 const remindersArray = dayData && dayData.reminders ? dayData.reminders : [];
 
-                const dotHtml = hasItineraryOrTask ? `<span class="w-1.5 h-1.5 bg-[#C5A059] rounded-full absolute top-3 right-3"></span>` : '';
-                
-                let remindersHtmlBlock = '';
+                // 1. Core structural activity indicator (Itinerary/Accomplishments)
+                const activityDotHtml = hasItineraryOrTask ? `<span class="w-1 h-1 bg-[#2C2A29] rounded-full"></span>` : '';
+
+                // 2. Reminder Dot State Logic (Solid vs Hollow)
+                let reminderDotHtml = '';
                 if (remindersArray.length > 0) {
-                    remindersHtmlBlock = `<div class="w-full space-y-1 mt-2">`;
-                    remindersArray.forEach(rem => {
-                        const isDone = typeof rem === 'object' ? rem.done : false;
-                        const textContent = typeof rem === 'object' ? rem.text : rem;
-                        const reminderStyle = isDone ? 'text-gray-300 line-through font-normal' : 'text-[#C5A059] font-medium';
-                        
-                        remindersHtmlBlock += `
-                            <p class="text-[10px] ${reminderStyle} italic tracking-wide text-left leading-tight break-words pr-1">
-                                • ${textContent}
-                            </p>
-                        `;
-                    });
-                    remindersHtmlBlock += `</div>`;
+                    // Check if every single reminder object has done set to true
+                    const allDone = remindersArray.every(rem => typeof rem === 'object' && rem.done === true);
+                    
+                    if (allDone) {
+                        // Hollow ring marker if everything is finished
+                        reminderDotHtml = `<span class="w-2 h-2 border border-[#C5A059] rounded-full inline-block bg-transparent" title="All reminders completed"></span>`;
+                    } else {
+                        // Solid gold dot marker if there are still active items left
+                        reminderDotHtml = `<span class="w-2 h-2 bg-[#C5A059] rounded-full inline-block" title="Active reminders pending"></span>`;
+                    }
                 }
+
+                // 3. Current Day Highlight State
+                const isToday = dateKey === todayKey;
+                const todayMarkerHtml = isToday ? `<span class="w-1.5 h-1.5 bg-red-400 rounded-full absolute top-1.5 right-1.5" title="Today"></span>` : '';
+                const todayCardStyle = isToday ? 'border-red-200 bg-red-50/20' : 'border-[#E5E4E2] bg-[#FAF9F6]';
 
                 grid.innerHTML += `
                     <button onclick="selectDate('${dateKey}', ${day})" 
-                        class="bg-[#FAF9F6] border border-[#E5E4E2] hover:border-[#C5A059] p-2.5 text-sm rounded-xl transition duration-150 group flex flex-col justify-start items-start min-h-[4rem] h-full w-full relative shadow-sm">
-                        ${dotHtml}
-                        <span class="group-hover:text-[#C5A059] text-gray-500 font-mono font-bold text-xs leading-none">${day}</span>
-                        ${remindersHtmlBlock}
+                        class="${todayCardStyle} border hover:border-[#C5A059] h-14 w-full text-sm rounded-xl transition duration-150 flex flex-col items-center justify-center relative group shadow-sm">
+                        ${todayMarkerHtml}
+                        <span class="group-hover:text-[#C5A059] text-gray-600 font-mono font-medium">${day}</span>
+                        <div class="flex gap-1 items-center justify-center mt-1 min-h-[8px]">
+                            ${activityDotHtml}
+                            ${reminderDotHtml}
+                        </div>
                     </button>
                 `;
             }
@@ -274,7 +286,7 @@
                     appData[selectedDateString].manifestation = inputVal;
                     syncData();
                     renderManifestationBubble();
-                    renderCalendar(); 
+                    renderCalendar(); // <--- Make sure this line is here to refresh indicators!
                 }
             }
         }
@@ -327,9 +339,12 @@
 
             items.forEach((item, index) => {
                 listContainer.innerHTML += `
-                    <li class="bg-white border border-[#E5E4E2] p-3 rounded-xl flex items-start gap-3 shadow-sm text-sm">
-                        <input type="checkbox" checked onclick="removeAccomplishment(${index})" class="mt-1 h-4 w-4 accent-[#C5A059] cursor-pointer">
-                        <span class="text-gray-700 font-medium">${item}</span>
+                    <li class="bg-white border border-[#E5E4E2] p-3 rounded-xl flex items-center justify-between shadow-sm text-sm group transition-all">
+                        <span class="text-gray-700 font-medium leading-tight mr-2">${item}</span>
+                        <button onclick="removeAccomplishment(${index})" 
+                            class="text-gray-300 hover:text-red-400 text-xs px-2 py-1 transition flex-shrink-0">
+                            ✕
+                        </button>
                     </li>`;
             });
         }
