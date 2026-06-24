@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Curated Life Itinerary</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .serif { font-family: 'Playfair Display', serif; }
+    </style>
+</head>
+<body class="bg-[#FAF9F6] text-[#2C2A29] min-h-screen">
+
+    <header class="border-b border-[#E5E4E2] bg-white/80 backdrop-blur px-8 py-4 flex justify-between items-center sticky top-0 z-50">
+        <h1 onclick="showCalendarView()" class="serif text-xl font-semibold tracking-wide text-[#1A1A1A] cursor-pointer hover:opacity-70 transition">THE CURATED REALITY</h1>
+        <!-- INTERACTIVE GLOBAL STATE DROPDOWN -->
+        <div class="flex items-center gap-1.5 bg-[#E6DFD3] text-[#5C5346] px-3 py-1.5 rounded-full text-xs tracking-widest uppercase font-medium border border-transparent hover:border-[#C5A059] transition">
+            <label for="state-selector" class="cursor-pointer select-none">State:</label>
+            <select id="state-selector" onchange="updateGlobalState()" 
+                class="bg-transparent text-[#5C5346] uppercase font-medium focus:outline-none cursor-pointer tracking-widest pr-2">
+                <option value="Master of Manifestation" selected>Master of Manifestation</option>
+                <option value="Master Architect">Master Architect</option>
+                <option value="Quantum Traveler">Quantum Traveler</option>
+                <option value="Divine Observer">Divine Observer</option>
+                <option value="Pure Alignment">Pure Alignment</option>
+            </select>
+        </div>
+    </header>
+
+    <section id="calendar-view" class="max-w-4xl mx-auto px-4 py-12">
+        <div class="text-center space-y-3 mb-12">
+            <h2 class="serif text-4xl italic text-[#3A3329]">Select Your Destination Date</h2>
+            <p class="text-xs tracking-widest text-gray-400 uppercase">Every day is a curated journey. Where are we traveling next?</p>
+        </div>
+
+        <div class="bg-white border border-[#E5E4E2] rounded-2xl p-6 shadow-sm space-y-6">
+            <div class="flex justify-between items-center border-b border-gray-100 pb-4">
+                <button onclick="changeMonth(-1)" class="text-gray-400 hover:text-black font-medium px-2">← Prev</button>
+                <h3 id="calendar-month-year" class="serif text-xl font-medium text-[#1A1A1A]">June 2026</h3>
+                <button onclick="changeMonth(1)" class="text-gray-400 hover:text-black font-medium px-2">Next →</button>
+            </div>
+
+            <div class="grid grid-cols-7 gap-2 text-center text-xs tracking-wider font-semibold text-gray-400 uppercase">
+                <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+            </div>
+
+            <div id="calendar-grid" class="grid grid-cols-7 gap-2 text-center"></div>
+        </div>
+    </section>
+
+    <section id="day-view" class="max-w-6xl mx-auto px-4 py-10 hidden">
+        <button onclick="showCalendarView()" class="text-xs tracking-wider text-gray-400 hover:text-black uppercase mb-6 flex items-center gap-1 transition">
+            ← Return to Calendar Overview
+        </button>
+
+        <main class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div class="lg:col-span-2 space-y-6">
+                <!-- DYNAMIC DAILY MANIFESTATION BUBBLE -->
+                <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-2 border-b border-[#E5E4E2] pb-3">
+                    <h2 id="selected-date-heading" class="serif text-2xl italic text-[#3A3329]">24/6 Tue Paris</h2>
+                    <div class="flex items-center gap-2 min-h-[32px]" id="manifestation-container">
+                        <!-- Content injected dynamically via JavaScript -->
+                    </div>
+                </div>
+
+                <div class="bg-white border border-[#E5E4E2] p-5 rounded-xl shadow-sm space-y-4">
+                    <p class="text-xs uppercase tracking-wider font-semibold text-gray-500">Book Next Destination</p>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <div>
+                            <label class="block text-[10px] text-gray-400 uppercase font-medium mb-1">Time</label>
+                            <input type="text" id="iti-time" placeholder="e.g., 09:30-10:15" 
+                                class="w-full bg-[#FAF9F6] border border-[#E5E4E2] rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-[#C5A059]">
+                        </div>
+                        <div class="col-span-2 md:col-span-2">
+                            <label class="block text-[10px] text-gray-400 uppercase font-medium mb-1">Activity / Experience</label>
+                            <input type="text" id="iti-activity" placeholder="e.g., Breakfast at Ritz Paris Le Comptoir" 
+                                class="w-full bg-[#FAF9F6] border border-[#E5E4E2] rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-[#C5A059]">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] text-gray-400 uppercase font-medium mb-1">State</label>
+                            <input type="text" id="iti-state" placeholder="e.g., Focus/Calm" 
+                                class="w-full bg-[#FAF9F6] border border-[#E5E4E2] rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-[#C5A059]">
+                        </div>
+                    </div>
+                    <div class="flex justify-end gap-2 pt-2 border-t border-gray-50">
+                        <button onclick="clearItinerary()" class="text-xs text-gray-400 hover:text-red-500 transition mr-auto">Clear All</button>
+                        <button onclick="addItineraryItem()" class="bg-[#2C2A29] text-white px-4 py-1.5 rounded-lg text-xs font-medium hover:bg-[#4A4744] transition">
+                            Confirm
+                        </button>
+                    </div>
+                </div>
+
+                <div class="space-y-3" id="timeline-container"></div>
+            </div>
+
+            <div class="space-y-6">
+                <div class="border-b border-[#E5E4E2] pb-2">
+                    <h2 class="serif text-2xl italic text-[#3A3329]">Accomplishments</h2>
+                </div>
+
+                <div class="bg-white border border-[#E5E4E2] p-4 rounded-xl shadow-sm space-y-3">
+                    <label class="text-xs uppercase tracking-wider font-semibold text-gray-500 block">What did you brilliantly achieve today?</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="task-input" placeholder="e.g., I am proud of myself that I've finished my writing." 
+                            class="w-full bg-[#FAF9F6] border border-[#E5E4E2] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#C5A059]">
+                        <button onclick="addAccomplishment()" class="bg-[#2C2A29] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#4A4744] transition">
+                            Script
+                        </button>
+                    </div>
+                </div>
+
+                <ul class="space-y-2.5" id="accomplishments-list"></ul>
+
+                <div class="space-y-6 pt-6 border-t border-[#E5E4E2]/60">
+                    <div class="border-b border-[#E5E4E2] pb-2">
+                        <h2 class="serif text-2xl italic text-[#3A3329]">Reminders</h2>
+                    </div>
+                
+                    <div class="bg-white border border-[#E5E4E2] p-4 rounded-xl shadow-sm space-y-3">
+                        <label class="text-xs uppercase tracking-wider font-semibold text-gray-500 block">Add a note/reminder for this day:</label>
+                        <div class="flex gap-2">
+                            <input type="text" id="reminder-input" placeholder="e.g., Charity event 7pm" 
+                                class="w-full bg-[#FAF9F6] border border-[#E5E4E2] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#C5A059]">
+                            <button onclick="addReminder()" class="bg-[#2C2A29] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#4A4744] transition">
+                                Add
+                            </button>
+                        </div>
+                    </div>
+                
+                    <ul class="space-y-2.5" id="reminders-list"></ul>
+                </div>
+            </div>
+        </main>
+    </section>
+
+    <script>
+        let currentYear = 2026;
+        let currentMonth = 5; 
+        let selectedDateString = ""; 
+        let globalIdentityState = "Master of Manifestation";
+
+        // LOCAL STORAGE LOAD AND INITIALIZATION
+        let appData = JSON.parse(localStorage.getItem('curatedAppData')) || {
+            "2026-06-24": {
+                itinerary: [
+                    { time: "08:00-08:30", activity: "Make coffee", state: "Calm" },
+                ],
+                achievements: ["I am so happy I've done grocery shopping."],
+                reminders: [],
+                manifestation: ""
+            }
+        };
+
+        const monthNames = [
+            "January", "February", "March", "April", "May", "June", 
+            "July", "August", "September", "October", "November", "December"
+        ];
+
+        // Central data persistence synchronization trigger
+        function syncData() {
+            localStorage.setItem('curatedAppData', JSON.stringify(appData));
+        }
+
+        function renderCalendar() {
+            document.getElementById('calendar-month-year').innerText = `${monthNames[currentMonth]} ${currentYear}`;
+            const grid = document.getElementById('calendar-grid');
+            grid.innerHTML = '';
+
+            const firstDayIndex = new Date(currentYear, currentMonth, 1).getDay();
+            const totalDays = new Date(currentYear, currentMonth + 1, 0).getDate();
+
+            for (let i = 0; i < firstDayIndex; i++) {
+                grid.innerHTML += `<div></div>`;
+            }
+
+            for (let day = 1; day <= totalDays; day++) {
+                const dateKey = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                
+                const dayData = appData[dateKey];
+                const hasItineraryOrTask = dayData && ((dayData.itinerary && dayData.itinerary.length > 0) || (dayData.achievements && dayData.achievements.length > 0));
+                const remindersArray = dayData && dayData.reminders ? dayData.reminders : [];
+
+                const dotHtml = hasItineraryOrTask ? `<span class="w-1.5 h-1.5 bg-[#C5A059] rounded-full absolute top-3 right-3"></span>` : '';
+                
+                let remindersHtmlBlock = '';
+                if (remindersArray.length > 0) {
+                    remindersHtmlBlock = `<div class="w-full space-y-1 mt-2">`;
+                    remindersArray.forEach(rem => {
+                        const isDone = typeof rem === 'object' ? rem.done : false;
+                        const textContent = typeof rem === 'object' ? rem.text : rem;
+                        const reminderStyle = isDone ? 'text-gray-300 line-through font-normal' : 'text-[#C5A059] font-medium';
+                        
+                        remindersHtmlBlock += `
+                            <p class="text-[10px] ${reminderStyle} italic tracking-wide text-left leading-tight break-words pr-1">
+                                • ${textContent}
+                            </p>
+                        `;
+                    });
+                    remindersHtmlBlock += `</div>`;
+                }
+
+                grid.innerHTML += `
+                    <button onclick="selectDate('${dateKey}', ${day})" 
+                        class="bg-[#FAF9F6] border border-[#E5E4E2] hover:border-[#C5A059] p-2.5 text-sm rounded-xl transition duration-150 group flex flex-col justify-start items-start min-h-[4rem] h-full w-full relative shadow-sm">
+                        ${dotHtml}
+                        <span class="group-hover:text-[#C5A059] text-gray-500 font-mono font-bold text-xs leading-none">${day}</span>
+                        ${remindersHtmlBlock}
+                    </button>
+                `;
+            }
+        }
+
+        function changeMonth(direction) {
+            currentMonth += direction;
+            if (currentMonth > 11) {
+                currentMonth = 0;
+                currentYear++;
+            } else if (currentMonth < 0) {
+                currentMonth = 11;
+                currentYear--;
+            }
+            renderCalendar();
+        }
+
+        function selectDate(dateKey, dayNumber) {
+            selectedDateString = dateKey;
+            
+            const dayOfWeek = new Date(currentYear, currentMonth, dayNumber).toLocaleDateString('en-US', { weekday: 'short' });
+            document.getElementById('selected-date-heading').innerText = `${dayNumber}/${currentMonth + 1} ${dayOfWeek}`;
+
+            if (!appData[selectedDateString]) {
+                appData[selectedDateString] = { itinerary: [], achievements: [], reminders: [], manifestation: "" };
+            }
+            
+            renderManifestationBubble();
+
+            document.getElementById('calendar-view').classList.add('hidden');
+            document.getElementById('day-view').classList.remove('hidden');
+
+            renderItinerary();
+            renderAccomplishments();
+            renderReminders();
+        }
+
+        // DYNAMIC MANIFESTATION BUBBLE LOGIC
+        function renderManifestationBubble() {
+            const container = document.getElementById('manifestation-container');
+            const savedText = appData[selectedDateString].manifestation || "";
+
+            if (!savedText) {
+                container.innerHTML = `
+                    <span class="text-[10px] uppercase tracking-wider font-semibold text-gray-400">Manifestation of the day:</span>
+                    <input type="text" id="daily-manifestation-input" placeholder="e.g., I am always rich and pretty." 
+                        class="bg-transparent border-b border-dashed border-[#C5A059] text-sm text-amber-800 font-medium italic focus:outline-none focus:border-amber-900 px-1 py-0.5 placeholder-gray-300 w-52"
+                        onkeypress="handleManifestationKey(event)">
+                `;
+            } else {
+                container.innerHTML = `
+                    <span class="text-[10px] uppercase tracking-wider font-semibold text-gray-400">Manifestation of the day:</span>
+                    <div onclick="editManifestation()" class="bg-[#FAF9F6] border border-[#C5A059] text-amber-800 text-xs font-medium italic px-3 py-1 rounded-full shadow-sm cursor-pointer hover:bg-[#FAF9F6]/50 hover:border-amber-700 transition flex items-center gap-2 select-none">
+                        <span>${savedText}</span>
+                        <span class="text-[9px] text-gray-400 not-italic">✏️</span>
+                    </div>
+                `;
+            }
+        }
+
+        function handleManifestationKey(e) {
+            if (e.key === 'Enter') {
+                const inputVal = document.getElementById('daily-manifestation-input').value.trim();
+                if (inputVal) {
+                    appData[selectedDateString].manifestation = inputVal;
+                    syncData();
+                    renderManifestationBubble();
+                    renderCalendar(); 
+                }
+            }
+        }
+
+        function editManifestation() {
+            const currentText = appData[selectedDateString].manifestation;
+            appData[selectedDateString].manifestation = ""; 
+            renderManifestationBubble();
+            
+            const input = document.getElementById('daily-manifestation-input');
+            input.value = currentText;
+            input.focus();
+        }
+
+        function showCalendarView() {
+            document.getElementById('day-view').classList.add('hidden');
+            document.getElementById('calendar-view').classList.remove('hidden');
+            renderCalendar(); 
+        }
+
+        function renderItinerary() {
+            const container = document.getElementById('timeline-container');
+            container.innerHTML = '';
+            const items = appData[selectedDateString].itinerary;
+
+            if (items.length === 0) {
+                container.innerHTML = `<div class="text-center py-12 text-gray-400 italic text-sm bg-white border border-dashed rounded-xl">No destination booked for this day yet.</div>`;
+                return;
+            }
+
+            items.forEach((item, index) => {
+                container.innerHTML += `
+                    <div class="bg-white border border-[#E5E4E2] p-4 rounded-xl shadow-sm flex justify-between items-center transition hover:border-[#D4AF37]">
+                        <div class="flex items-center gap-4">
+                            <span class="text-xs font-mono font-semibold tracking-wider text-gray-500 bg-gray-50 px-2 py-1 rounded w-24 text-center">${item.time}</span>
+                            <div>
+                                <p class="font-medium text-[#1A1A1A] text-sm">${item.activity}</p>
+                                <p class="text-xs text-amber-700 font-medium italic mt-0.5">${item.state ? `[${item.state}]` : ''}</p>
+                            </div>
+                        </div>
+                        <button onclick="deleteItineraryItem(${index})" class="text-gray-300 hover:text-red-400 text-xs px-2 py-1">✕</button>
+                    </div>`;
+            });
+        }
+
+        function renderAccomplishments() {
+            const listContainer = document.getElementById('accomplishments-list');
+            listContainer.innerHTML = '';
+            const items = appData[selectedDateString].achievements;
+
+            items.forEach((item, index) => {
+                listContainer.innerHTML += `
+                    <li class="bg-white border border-[#E5E4E2] p-3 rounded-xl flex items-start gap-3 shadow-sm text-sm">
+                        <input type="checkbox" checked onclick="removeAccomplishment(${index})" class="mt-1 h-4 w-4 accent-[#C5A059] cursor-pointer">
+                        <span class="text-gray-700 font-medium">${item}</span>
+                    </li>`;
+            });
+        }
+
+        function addItineraryItem() {
+            const timeInput = document.getElementById('iti-time');
+            const activityInput = document.getElementById('iti-activity');
+            const stateInput = document.getElementById('iti-state');
+
+            if (!timeInput.value || !activityInput.value) return;
+
+            appData[selectedDateString].itinerary.push({
+                time: timeInput.value.trim(),
+                activity: activityInput.value.trim(),
+                state: stateInput.value.trim()
+            });
+
+            // CHRONOLOGICAL SORTING
+            appData[selectedDateString].itinerary.sort((a, b) => {
+                const timeA = a.time.split(/[- ]/)[0].trim();
+                const timeB = b.time.split(/[- ]/)[0].trim();
+                const normalize = (t) => t.replace(':', '').padStart(4, '0');
+                return normalize(timeA).localeCompare(normalize(timeB));
+            });
+
+            syncData();
+            timeInput.value = ''; activityInput.value = ''; stateInput.value = '';
+            renderItinerary();
+        }
+
+        function deleteItineraryItem(index) {
+            appData[selectedDateString].itinerary.splice(index, 1);
+            syncData();
+            renderItinerary();
+        }
+
+        function clearItinerary() {
+            if(confirm("Clear this day's active plan?")) {
+                appData[selectedDateString].itinerary = [];
+                syncData();
+                renderItinerary();
+            }
+        }
+
+        function addAccomplishment() {
+            const input = document.getElementById('task-input');
+            const taskText = input.value.trim();
+            if (taskText === '') return;
+
+            appData[selectedDateString].achievements.unshift(taskText);
+            syncData();
+            input.value = '';
+            renderAccomplishments();
+        }
+
+        function removeAccomplishment(index) {
+            appData[selectedDateString].achievements.splice(index, 1);
+            syncData();
+            renderAccomplishments();
+        }
+
+        document.getElementById('task-input').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') addAccomplishment();
+        });
+
+        function renderReminders() {
+            const listContainer = document.getElementById('reminders-list');
+            listContainer.innerHTML = '';
+            
+            if (!appData[selectedDateString].reminders) {
+                appData[selectedDateString].reminders = [];
+            }
+            
+            const items = appData[selectedDateString].reminders;
+
+            items.forEach((item, index) => {
+                const isDone = typeof item === 'object' ? item.done : false;
+                const textContent = typeof item === 'object' ? item.text : item;
+                const textStyle = isDone ? 'text-gray-400 line-through font-normal' : 'text-gray-700 font-medium';
+
+                listContainer.innerHTML += `
+                    <li class="bg-white border border-[#E5E4E2] p-3 rounded-xl flex items-start justify-between shadow-sm text-sm group transition-all">
+                        <div class="flex items-start gap-3 flex-1 mr-2">
+                            <input type="checkbox" ${isDone ? 'checked' : ''} onclick="toggleReminder(${index})" 
+                                class="mt-1 h-4 w-4 accent-[#C5A059] border-gray-300 rounded cursor-pointer transition">
+                            <span class="${textStyle} leading-tight transition-all">${textContent}</span>
+                        </div>
+                        <button onclick="removeReminder(${index})" 
+                            class="text-gray-300 hover:text-red-400 text-xs px-1 mt-0.5 transition opacity-0 group-hover:opacity-100" title="Delete permanently">
+                            ✕
+                        </button>
+                    </li>`;
+            });
+        }
+
+        function addReminder() {
+            const input = document.getElementById('reminder-input');
+            const reminderText = input.value.trim();
+            if (reminderText === '') return;
+
+            if (!appData[selectedDateString].reminders) {
+                appData[selectedDateString].reminders = [];
+            }
+
+            appData[selectedDateString].reminders.push({ text: reminderText, done: false });
+            syncData();
+            input.value = '';
+            renderReminders();
+        }
+
+        function toggleReminder(index) {
+            const item = appData[selectedDateString].reminders[index];
+            if (typeof item === 'object') {
+                item.done = !item.done;
+            } else {
+                appData[selectedDateString].reminders[index] = { text: item, done: true };
+            }
+            syncData();
+            renderReminders();
+        }
+
+        function removeReminder(index) {
+            appData[selectedDateString].reminders.splice(index, 1);
+            syncData();
+            renderReminders();
+        }
+
+        function updateGlobalState() {
+            const selectedVal = document.getElementById('state-selector').value;
+            globalIdentityState = selectedVal;
+            // State can also be saved if needed, or left dynamic per session
+            localStorage.setItem('curatedGlobalState', globalIdentityState);
+        }
+
+        // Restore global state dropdown selection on load
+        if (localStorage.getItem('curatedGlobalState')) {
+            globalIdentityState = localStorage.getItem('curatedGlobalState');
+            const selector = document.getElementById('state-selector');
+            if (selector) selector.value = globalIdentityState;
+        }
+
+        document.getElementById('reminder-input').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') addReminder();
+        });
+
+        renderCalendar();
+    </script>
+</body>
+</html>
