@@ -17,7 +17,6 @@
         <h1 onclick="showCalendarView()" class="serif text-xl font-semibold tracking-wide text-[#1A1A1A] cursor-pointer hover:opacity-70 transition">THE CURATED REALITY</h1>
         <!-- INTERACTIVE GLOBAL STATE DROPDOWN -->
         <div class="flex items-center gap-1.5 bg-[#E6DFD3] text-[#5C5346] px-3 py-1.5 rounded-full text-xs tracking-widest uppercase font-medium border border-transparent hover:border-[#C5A059] transition">
-            <label for="state-selector" class="cursor-pointer select-none">State:</label>
             <select id="state-selector" onchange="updateGlobalState()" 
                 class="bg-transparent text-[#5C5346] uppercase font-medium focus:outline-none cursor-pointer tracking-widest pr-2">
                 <option value="Master of Manifestation" selected>Master of Manifestation</option>
@@ -69,7 +68,7 @@
                     <p class="text-xs uppercase tracking-wider font-semibold text-gray-500">Book Next Destination</p>
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
                         <div>
-                            <label class="block text-[10px] text-gray-400 uppercase font-medium mb-1">Time (HH:MM) (24H)</label>
+                            <label class="block text-[10px] text-gray-400 uppercase font-medium mb-1">Time (HH:MM-HH:MM) (24H)</label>
                             <input type="text" id="iti-time" placeholder="e.g., 09:30-10:15" 
                                 class="w-full bg-[#FAF9F6] border border-[#E5E4E2] rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-[#C5A059]">
                         </div>
@@ -313,21 +312,21 @@
             const items = appData[selectedDateString].itinerary;
 
             if (items.length === 0) {
-                container.innerHTML = `<div class="text-center py-12 text-gray-400 italic text-sm bg-white border border-dashed rounded-xl">No destination booked for this day yet.</div>`;
+                container.innerHTML = `<div class="text-center py-12 text-gray-400 italic text-sm bg-white border border-dashed rounded-xl">No destinations booked for this day yet.</div>`;
                 return;
             }
 
             items.forEach((item, index) => {
                 container.innerHTML += `
                     <div class="bg-white border border-[#E5E4E2] p-4 rounded-xl shadow-sm flex justify-between items-center transition hover:border-[#D4AF37]">
-                        <div class="flex items-center gap-4">
-                            <span class="text-xs font-mono font-semibold tracking-wider text-gray-500 bg-gray-50 px-2 py-1 rounded w-24 text-center">${item.time}</span>
-                            <div>
-                                <p class="font-medium text-[#1A1A1A] text-sm">${item.activity}</p>
-                                <p class="text-xs text-amber-700 font-medium italic mt-0.5">${item.state ? `[${item.state}]` : ''}</p>
+                        <div class="flex items-center gap-4 min-w-0 flex-1">
+                            <span class="text-xs font-mono font-semibold tracking-wider text-gray-500 bg-gray-50 px-2 py-1 rounded w-[85px] flex-shrink-0 text-center">${item.time}</span>
+                            <div class="min-w-0">
+                                <p class="font-medium text-[#1A1A1A] text-sm truncate">${item.activity}</p>
+                                <p class="text-xs text-amber-700 font-medium italic mt-0.5 truncate">${item.state ? `[${item.state}]` : ''}</p>
                             </div>
                         </div>
-                        <button onclick="deleteItineraryItem(${index})" class="text-gray-300 hover:text-red-400 text-xs px-2 py-1">✕</button>
+                        <button onclick="deleteItineraryItem(${index})" class="text-gray-300 hover:text-red-400 text-xs px-2 py-1 flex-shrink-0 ml-2">✕</button>
                     </div>`;
             });
         }
